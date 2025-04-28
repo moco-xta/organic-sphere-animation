@@ -15,12 +15,10 @@ const nextConfig: NextConfig = {
   transpilePackages: ['three'],
   webpack: (config) => {
     config.experiments = { asyncWebAssembly: true }
-    config.module.rules.push(
-      {
-        test: /\.(glsl|vs|fs|vert|frag)$/,
-        use: ['raw-loader'],
-      },
-    )
+    config.module.rules.push({
+      test: /\.(glsl|vs|fs|vert|frag)$/,
+      use: ['raw-loader'],
+    })
     return config
   },
 }

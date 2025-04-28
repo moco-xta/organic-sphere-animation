@@ -1,11 +1,5 @@
 uniform float uTime;
-
-varying vec3 vPosition;
-varying vec3 vNormal;
-varying vec2 vUv;
 varying float vDisplacement;
-
-#define PI 3.1415926538
 
 //	Classic Perlin 3D Noise 
 //	by Stefan Gustavson
@@ -81,7 +75,6 @@ float noise(vec3 P){
   float n_xyz = mix(n_yz.x, n_yz.y, fade_xyz.x); 
   return 2.2 * n_xyz;
 }
-
 /* 
 * SMOOTH MOD
 * - authored by @charstiles -
@@ -104,22 +97,5 @@ float fit(float unscaled, float originalMin, float originalMax, float minAllowed
 }
 
 float wave(vec3 position) {
-	return fit(smoothMod(position.y * 6.0, 1.0, 1.5), 0.35, 0.6, 0.0, 1.0);
-}
-
-void main() {
-	vec3 coords = normal;
-	coords.y += uTime * 0.1;
-	vec3 noisePattern = vec3(noise(coords));
-	float pattern = wave(noisePattern);
-
-	vPosition = position;
-	vNormal = normal;
-	vUv = uv;
-	vDisplacement = pattern;
-
-	float displacement = vDisplacement / 3.0;
-  
-	vec3 newPosition = position + normal * displacement;
-	gl_Position = projectionMatrix * modelViewMatrix * vec4( newPosition, 1.0 );
+  return fit(smoothMod(position.y * 6.0, 1.0, 1.5), 0.35, 0.6, 0.0, 1.0);
 }

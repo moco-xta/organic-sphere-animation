@@ -5,8 +5,12 @@ import * as THREE from 'three'
 import { Canvas, useFrame, useThree } from '@react-three/fiber'
 import { OrbitControls, PerspectiveCamera } from '@react-three/drei'
 
-import vertexShader from './shaders/vertexShader.glsl'
-import fragmentShader from './shaders/fragmentShader.glsl'
+import NodeBasedOrganicAnimationScene from './NodeBasedOrganicAnimationScene'
+
+// import vertexShader from './shaders/vertexShader.glsl'
+import vertexShaderPars from './shaders/vertexShaderPars.glsl'
+import vertexShaderMain from './shaders/vertexShaderMain.glsl'
+// import fragmentShader from './shaders/fragmentShader.glsl'
 
 import './index.scss'
 
@@ -21,13 +25,35 @@ function Scene() {
     if (!isLoaded) {
       const geometry = new THREE.IcosahedronGeometry(1, 100)
       // const material = new THREE.MeshStandardMaterial({ color: 0x00ff00 })
-      const material = new THREE.ShaderMaterial({
-        uniforms: {
-          uTime: { value: 0 },
+      // const material = new THREE.ShaderMaterial({
+        // uniforms: {
+          // uTime: { value: 0 },
+        // },
+        // vertexShader: vertexShader,
+        // fragmentShader: fragmentShader,
+      // })
+      const material = new THREE.MeshStandardMaterial({
+        onBeforeCompile: (shader) => {
+          material.userData.shader = shader
+
+          shader.uniforms.uTime = { value: 0 }
+
+          const parsVertexString = /* glsl */ `#include <displacementmap_pars_vertex>`
+          shader.vertexShader = shader.vertexShader.replace(
+            parsVertexString,
+            parsVertexString + vertexShaderPars + '\n#endif',
+          )
+
+          const mainVertexString = /* glsl */ `#include <displacementmap_vertex>`
+          shader.vertexShader = shader.vertexShader.replace(
+            mainVertexString,
+            mainVertexString + vertexShaderMain + '\n#endif',
+          )
+
+          console.log(shader.fragmentShader)
         },
-        vertexShader: vertexShader,
-        fragmentShader: fragmentShader,
       })
+      // material.defines['USE_DISPLACEMENTMAP'] = true
 
       modelRef.current = new THREE.Mesh(geometry, material)
       modelRef.current.receiveShadow = true
@@ -43,14 +69,14 @@ function Scene() {
     const time = clock.getElapsedTime()
 
     if (modelRef.current && modelRef.current.material instanceof THREE.ShaderMaterial) {
-      modelRef.current.material.uniforms.uTime.value = time
+      modelRef.current.material.userData.shader.uniforms.uTime.value = time
     }
   })
 
   return null
 }
 
-export default function page() {
+/* export default function page() {
   return (
     <Canvas
       dpr={2}
@@ -74,4 +100,8 @@ export default function page() {
       <Scene />
     </Canvas>
   )
+} */
+
+export default function page() {
+  return <NodeBasedOrganicAnimationScene />
 }
